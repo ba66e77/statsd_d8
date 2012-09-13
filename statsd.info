@@ -1,3 +1,5 @@
 name = StatsD
 description = Logs and records system events to Graphite via StatsD
-core = 6.x
+core = 7.x
+configure = admin/config/development/statsd
+files[] = includes/statds.inc
