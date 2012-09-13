@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * Implementation of hook_uninstall()
+ *
+ */
+function statsd_uninstall() {
+
+  variable_del('statsd_host');
+  variable_del('statsd_port');
+  variable_del('statsd_sample_rate');
+  variable_del('statsd_use_watchdog');
+  variable_del('statsd_prefix');
+
+}

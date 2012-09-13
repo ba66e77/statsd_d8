@@ -1,0 +1,3 @@
+name = StatsD
+description = Logs and records system events to Graphite via StatsD
+core = 6.x
