@@ -25,6 +25,8 @@ function statsd_menu() {
  */
 function statsd_admin_settings() {
 
+  $watchdog_types = _dblog_get_message_types();
+
   $form['statsd_host'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Host'),
@@ -52,6 +54,21 @@ function statsd_admin_settings() {
     '#description'   => t('Enabling this feature will capture a count of the severity and type of errors passed through watchdog. Alternatively, it may be less spammy to use the built-in StatsD client to only record events your application cares about. With high traffic sites, it will likely be better to run a separate process to analyze log data, rather than using this feature.'),
     '#default_value' => variable_get('statsd_watchdog', TRUE),
   );
+  $form['statsd_watchdog_level'] = array(
+    '#type'          => 'select',
+    '#title'         => t('Log Level'),
+    '#description'   => t('If watchdog logging is enabled, only send data to StatsD within or above the selected threshold'),
+    '#options'       => watchdog_severity_levels(),
+    '#default_value' => variable_get('statsd_watchdog_level', WATCHDOG_WARNING),
+  );
+  $form['statsd_watchdog_type'] = array(
+    '#type'          => 'select',
+    '#multiple'      => TRUE,
+    '#title'         => t('Log Type'),
+    '#description'   => t('Filter messages sent to StatsD by log type.'),
+    '#options'       => array_combine($watchdog_types, $watchdog_types),
+    '#default_value' => variable_get('statsd_watchdog_type', NULL),
+  );
   $form['statsd_prefix'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Prefix'),
@@ -66,16 +83,39 @@ function statsd_admin_settings() {
 
 
 /**
+ * Validation handler for the administrative settings.
+ *
+ */
+function statsd_admin_settings_validate($form, &$form_state) {
+
+  $form_state['values']['statsd_host']        = trim($form_state['values']['statsd_host']);
+  $form_state['values']['statsd_port']        = trim($form_state['values']['statsd_port']);
+  $form_state['values']['statsd_sample_rate'] = trim($form_state['values']['statsd_sample_rate']);
+  $form_state['values']['statsd_prefix']      = trim(rtrim($form_state['values']['statsd_prefix'], '_') );
+
+  $sample_rate = $form_state['values']['statsd_sample_rate'];
+
+  if (!is_numeric($sample_rate) || $sample_rate <= 0 || $sample_rate > 1) {
+    form_set_error('statsd_sample_rate', t('The sample rate must be a value between 0 and 1') );
+  }
+
+}
+
+
+/**
  * Implementation of hook_watchdog()
  *
  */
 function statsd_watchdog($entry) {
 
-  if (!variable_get('statsd_watchdog', TRUE) ) {
+  $enabled = variable_get('statsd_watchdog', TRUE);
+  $level   = variable_get('statsd_watchdog_level', WATCHDOG_WARNING);
+  $types   = variable_get('statsd_watchdog_type', array() );
+
+  if (!$enabled || $level < $entry['severity'] || !isset($types[$entry['type']]) ) {
     return;
   }
 
-  module_load_include('inc', 'statsd', 'includes/statsd');
   $levels = watchdog_severity_levels();
   $prefix = ($prefix = variable_get('statsd_prefix', NULL) ) ? $prefix . '_' : '';
   $data   = array(
