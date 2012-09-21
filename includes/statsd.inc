@@ -25,6 +25,22 @@ class StatsD {
 
 
   /**
+   * Sends a gauge, an arbitrary value to statsd
+   *
+   * @param $stat 
+   *   The metric to send. 
+   * @param $value 
+   *   The value to send for this metric.
+   * @param $sample_rate
+   *   A float between 0 and 1 representing the sampling rate.
+   *
+   */
+  public static function gauge($stat, $value, $sample_rate = NULL) {
+    self::send(array($stat => "$value|g"), $sample_rate);
+  }
+
+
+  /**
    * Increments one or more stats counters
    *
    * @param $stats
@@ -58,7 +74,7 @@ class StatsD {
    * Updates one or more stats counters by arbitrary amounts.
    *
    * @param $stats
-   *   A string or an array of string representing the metric(s) to decrement.
+   *   A string or an array of string representing the metric(s) to increment or decrement.
    * @param $delta
    *   The amount to increment/decrement each metric by.
    * @param $sample_rate
@@ -78,7 +94,7 @@ class StatsD {
       $data[$stat] = "$delta|c";
     }
 
-    StatsD::send($data, $sample_rate);
+    self::send($data, $sample_rate);
 
   }
 
@@ -91,6 +107,7 @@ class StatsD {
 
     $sample_rate  = $sample_rate ? $sample_rate : variable_get('statsd_sample_rate', 1);
     $sampled_data = array();
+    $data         = self::prefixData($data);
 
     if ($sample_rate < 1) {
       foreach ($data as $stat => $value) {
@@ -117,6 +134,29 @@ class StatsD {
       }
       fclose($fp);
     }
+
+  }
+
+
+  /**
+   * Create the data strings that will be passed into statsd
+   * 
+   * @param $data
+   *   An array of key value pairs to prefix.
+   * 
+   */
+  protected function prefixData($data) {
+
+    $prefix = ($prefix = variable_get('statsd_prefix', NULL) ) ? $prefix . '.' : '';
+    $suffix = ($suffix = variable_get('statsd_suffix', NULL) ) ? '.' . $suffix : '';
+    $return = array();
+
+    foreach ($data as $key => $value) {
+      $name = sprintf('%s' . $key . '%s', $prefix, $suffix);
+      $return[$name] = $value;
+    }
+
+    return $return;
 
   }
 

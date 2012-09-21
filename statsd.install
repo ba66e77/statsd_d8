@@ -11,7 +11,7 @@ function statsd_uninstall() {
   variable_del('statsd_sample_rate');
   variable_del('statsd_watchdog');
   variable_del('statsd_watchdog_level');
-  variable_del('statsd_watchdog_type');
   variable_del('statsd_prefix');
+  variable_del('statsd_suffix');
 
 }
