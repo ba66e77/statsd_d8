@@ -151,7 +151,7 @@ function statsd_user_login(&$edit, $account) {
     return;
   }
 
-  statsd_call('user_events.succesful_login');
+  statsd_call('user_events.successful_login');
 
 }
 
