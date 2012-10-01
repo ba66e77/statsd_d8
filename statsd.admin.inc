@@ -6,6 +6,12 @@
  */
 function statsd_admin_settings() {
 
+  $form['statsd_enabled'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Enable StatsD'),
+    '#description'   => t('Enable StatsD logging. You may want to disable this in non-production environments.'),
+    '#default_value' => variable_get('statsd_enabled', FALSE),
+  );
   $form['statsd_host'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Host'),
@@ -20,31 +26,42 @@ function statsd_admin_settings() {
     '#description'   => t('The port of the StatsD daemon'),
     '#default_value' => variable_get('statsd_port', '8125'),
   );
+  $form['events'] = array(
+    '#type'        => 'fieldset',
+    '#title'       => t('Events'),
+    '#collapsible' => TRUE,
+  );
+  $form['events']['statsd_user_events'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Send User Events'),
+    '#description'   => t('Captures various user events in the following categories: active sessions, successful logins, failed logins, page views'),
+    '#default_value' => variable_get('statsd_user_events', TRUE),
+  );
+  $form['events']['statsd_performance_events'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Send Performance Events'),
+    '#description'   => t('Captures various performance events including peak memory usage and page execution time.'),
+    '#default_value' => variable_get('stats_performance_events', TRUE),
+  );
+  $form['events']['statsd_watchdog_events'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Send Watchdog Events'),
+    '#description'   => t('Captures the severity and type of errors passed through watchdog.'),
+    '#default_value' => variable_get('statsd_watchdog_events', TRUE),
+  );
+  $form['events']['statsd_watchdog_level'] = array(
+    '#type'          => 'select',
+    '#title'         => t('Log Level'),
+    '#description'   => t('If watchdog events are enabled, only send data to StatsD at or above the selected threshold'),
+    '#options'       => watchdog_severity_levels(),
+    '#default_value' => variable_get('statsd_watchdog_level', WATCHDOG_WARNING),
+  );
   $form['statsd_sample_rate'] = array(
     '#type'          => 'textfield',
     '#title'         => t('Sample Rate'),
     '#size'          => 2,
     '#description'   => t('StatsD can send a subset of events to Graphite. Choose a lower sample rate if you want to reduce the number of events being sent. Sample rates are between 0 and 1 (e.g. 0.1 implies 10% of events will be logged)'),
     '#default_value' => variable_get('statsd_sample_rate', 1),
-  );
-  $form['statsd_user_events'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Send User Events'),
-    '#description'   => t('Enabling this feature will capture a count of user events in the following categories: active sessions, successful logins, failed logins, password resets'),
-    '#default_value' => variable_get('statsd_user_events', TRUE),
-  );
-  $form['statsd_watchdog'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Use Watchdog'),
-    '#description'   => t('Enabling this feature will capture a count of the severity and type of errors passed through watchdog. Alternatively, it may be less spammy to use the built-in StatsD client to only record events your application cares about.'),
-    '#default_value' => variable_get('statsd_watchdog', TRUE),
-  );
-  $form['statsd_watchdog_level'] = array(
-    '#type'          => 'select',
-    '#title'         => t('Log Level'),
-    '#description'   => t('If watchdog logging is enabled, only send data to StatsD within or above the selected threshold'),
-    '#options'       => watchdog_severity_levels(),
-    '#default_value' => variable_get('statsd_watchdog_level', WATCHDOG_WARNING),
   );
   $form['statsd_prefix'] = array(
     '#type'          => 'textfield',

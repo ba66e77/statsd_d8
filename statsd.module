@@ -21,37 +21,17 @@ function statsd_menu() {
 
 
 /**
- * The generic statsd wrapper. Used for convenience.
- *
- * @param $name
- *   Name of the value you want to track.
- * @param $type
- *   The type of action you want to take with the value.
- * @param $value
- *   The numeric value you wish to pass to statsd.
+ * Implementation of hook_boot()
  *
  */
-function statsd_call($name, $type = 'increment', $value = NULL) {
+function statsd_boot() {
 
-  switch ($type) {
-    case 'increment':
-        StatsD::updateStats($name, isset($value) ? $value : 1);
-      break;
-    case 'decrement':
-        StatsD::updateStats($name, isset($value) ? $value : -1);
-      break;
-    case 'gauge':
-        StatsD::gauge($name, $value);
-      break;
-    case 'timing':
-        StatsD::timing($name, $value);
-      break;
-    default:
-        watchdog('statsd', 'Unknown method called for statsd - ' . $type, array(), WATCHDOG_WARNING);
-      break;
+  if (variable_get('statsd_performance_events', TRUE)) {
+    drupal_static('statsd_timer', microtime(TRUE));
   }
 
 }
+
 
 /**
  * Implementation of hook_user_login()
@@ -88,13 +68,20 @@ function statsd_user_login_failed($account) {
  */
 function statsd_exit($destination = NULL) {
 
-  if (!variable_get('statsd_user_events', TRUE)) {
-    return;
+  if (variable_get('statsd_user_events', TRUE)) {
+    $active_sessions = db_query("SELECT count(*) as num FROM {sessions} WHERE timestamp > UNIX_TIMESTAMP() - 3600")->fetchField();
+    statsd_call('user_events.active_sessions', 'gauge', $active_sessions);
+    statsd_call('user_events.page_view');
   }
 
-  $active_sessions = db_query("SELECT count(*) as num FROM {sessions} WHERE timestamp > UNIX_TIMESTAMP() - 3600")->fetchField();
-  statsd_call('user_events.active_sessions', 'gauge', $active_sessions);
-  statsd_call('user_events.page_view');
+  if (variable_get('statsd_performance_events', TRUE)) {
+    $memory = round(memory_get_peak_usage() / 1024 / 1024, 2);
+    statsd_call('performance_events.peak_memory', 'gauge', $memory);
+
+    $start  = &drupal_static('statsd_timer');
+    $end    = microtime(TRUE);
+    statsd_call('performance_events.execution_time', 'timing', ($end - $start));
+  }
 
 }
 
@@ -104,12 +91,12 @@ function statsd_exit($destination = NULL) {
  */
 function statsd_watchdog($entry) {
 
-  if (variable_get('statsd_user_events', TRUE) && strstr($entry['message'], 'Login attempt failed for')) {
+  if (strstr($entry['message'], 'Login attempt failed for')) {
     statsd_user_login_failed($entry['user']);
   }
 
-  $enabled      = variable_get('statsd_watchdog', TRUE);
-  $level        = variable_get('statsd_watchdog_level', WATCHDOG_WARNING);
+  $enabled = variable_get('statsd_watchdog_events', TRUE);
+  $level   = variable_get('statsd_watchdog_level', WATCHDOG_WARNING);
 
   if (!$enabled || $level < $entry['severity']) {
     return;
@@ -122,5 +109,42 @@ function statsd_watchdog($entry) {
   );
 
   statsd_call($data);
+
+}
+
+
+/* End of hooks, API functions follow.
+---------------------------------------------------------------------- */
+
+/**
+ * The generic statsd wrapper. Used for convenience.
+ *
+ * @param $name
+ *   Name of the value you want to track.
+ * @param $type
+ *   The type of action you want to take with the value.
+ * @param $value
+ *   The numeric value you wish to pass to statsd.
+ *
+ */
+function statsd_call($name, $type = 'increment', $value = NULL) {
+
+  switch ($type) {
+    case 'increment':
+        StatsD::updateStats($name, isset($value) ? $value : 1);
+      break;
+    case 'decrement':
+        StatsD::updateStats($name, isset($value) ? $value : -1);
+      break;
+    case 'gauge':
+        StatsD::gauge($name, $value);
+      break;
+    case 'timing':
+        StatsD::timing($name, $value);
+      break;
+    default:
+        watchdog('statsd', 'Unknown method called for statsd: %type', array('%type' => $type), WATCHDOG_WARNING);
+      break;
+  }
 
 }

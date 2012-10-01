@@ -105,6 +105,10 @@ class StatsD {
    */
   public static function send($data, $sample_rate = NULL) {
 
+    if (!variable_get('statsd_enabled', FALSE) ) {
+      return;
+    }
+
     $sample_rate  = $sample_rate ? $sample_rate : variable_get('statsd_sample_rate', 1);
     $sampled_data = array();
     $data         = self::prefixData($data);
