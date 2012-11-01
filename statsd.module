@@ -80,7 +80,8 @@ function statsd_exit($destination = NULL) {
 
     $start  = &drupal_static('statsd_timer');
     $end    = microtime(TRUE);
-    statsd_call('performance_events.execution_time', 'timing', ($end - $start));
+    $time   = round(($end - $start) * 1000, 0);
+    statsd_call('performance_events.execution_time', 'timing', $time);
   }
 
 }
