@@ -78,10 +78,13 @@ function statsd_exit($destination = NULL) {
     $memory = round(memory_get_peak_usage() / 1024 / 1024, 2);
     statsd_call('performance_events.peak_memory', 'gauge', $memory);
 
-    $start  = &drupal_static('statsd_timer');
-    $end    = microtime(TRUE);
-    $time   = round(($end - $start) * 1000, 0);
-    statsd_call('performance_events.execution_time', 'timing', $time);
+    $start = &drupal_static('statsd_timer');
+    // hook_boot() may not be called in certain contexts.
+    if ($start > 0) {
+      $end  = microtime(TRUE);
+      $time = round(($end - $start) * 1000, 0);
+      statsd_call('performance_events.execution_time', 'timing', $time);
+    }
   }
 
 }
