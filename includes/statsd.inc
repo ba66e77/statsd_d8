@@ -149,7 +149,7 @@ class StatsD {
    *   An array of key value pairs to prefix.
    * 
    */
-  protected function prefixData($data) {
+  protected static function prefixData($data) {
 
     $prefix = ($prefix = variable_get('statsd_prefix', NULL) ) ? $prefix . '.' : '';
     $suffix = ($suffix = variable_get('statsd_suffix', NULL) ) ? '.' . $suffix : '';
