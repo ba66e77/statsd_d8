@@ -134,7 +134,7 @@ function statsd_watchdog($entry) {
 function statsd_call($name, $type = 'increment', $value = NULL) {
   // In certain situations, hook_watchdog() is called early in the bootstrap
   // process before autoloaded classes are available.
-  module_load_include('inc', 'statsd', 'includes/statsd');
+  require_once __DIR__ . '/includes/statsd.inc';
 
   switch ($type) {
     case 'increment':
