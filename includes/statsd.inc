@@ -41,6 +41,33 @@ class StatsD {
 
 
   /**
+   * Sends one or more set values to statsd.
+   *
+   * Sets count the number of unique values received during the flush interval.
+   *
+   * @param string $stat
+   *   The metric name.
+   * @param mixed $values
+   *   The value (or array of values) to send for this metric.
+   * @param float $sample_rate
+   *   (optional) A float between 0 and 1 representing the sampling rate.
+   */
+  public static function set($stat, $values, $sample_rate = NULL) {
+    $data = array();
+
+    if (!is_array($values)) {
+      $values = array($values);
+    }
+
+    foreach ($values as $value) {
+      $data[$stat] = "$value|s";
+    }
+
+    self::send($data, $sample_rate);
+  }
+
+
+  /**
    * Increments one or more stats counters
    *
    * @param $stats

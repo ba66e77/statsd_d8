@@ -162,6 +162,9 @@ function statsd_call($name, $type = 'increment', $value = NULL) {
     case 'gauge':
       StatsD::gauge($name, $value);
       break;
+    case 'set':
+      StatsD::set($name, $value);
+      break;
     case 'time':
     case 'timing':
     StatsD::timing($name, $value);
