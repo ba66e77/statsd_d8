@@ -4,18 +4,18 @@
 /**
  * Sends statistics to the stats daemon over UDP
  *
- **/
+ */
 
 class StatsD {
 
   /**
-   * Log timing information
+   * Log timing information.
    *
-   * @param $stat
+   * @param string $stat
    *   A string of the metric to log timing info for.
-   * @param $time
-   *   The ellapsed time (ms) to log
-   * @param $sample_rate
+   * @param int $time
+   *   The elapsed time (ms) to log.
+   * @param float $sample_rate
    *   A float between 0 and 1 representing the sampling rate.
    *
    */
@@ -25,13 +25,13 @@ class StatsD {
 
 
   /**
-   * Sends a gauge, an arbitrary value to statsd
+   * Sends a gauge, an arbitrary value to statsd.
    *
-   * @param $stat 
+   * @param string $stat
    *   The metric to send. 
-   * @param $value 
+   * @param mixed $value
    *   The value to send for this metric.
-   * @param $sample_rate
+   * @param float $sample_rate
    *   A float between 0 and 1 representing the sampling rate.
    *
    */
@@ -51,6 +51,7 @@ class StatsD {
    *   The value (or array of values) to send for this metric.
    * @param float $sample_rate
    *   (optional) A float between 0 and 1 representing the sampling rate.
+   *
    */
   public static function set($stat, $values, $sample_rate = NULL) {
     $data = array();
@@ -68,13 +69,12 @@ class StatsD {
 
 
   /**
-   * Increments one or more stats counters
+   * Increments one or more stats counters.
    *
-   * @param $stats
+   * @param mixed $stats
    *   A string or an array of string representing the metric(s) to increment.
-   * @param $sample_rate
+   * @param float $sample_rate
    *   A float between 0 and 1 representing the sampling rate.
-   * @return boolean
    *
    */
   public static function increment($stats, $sample_rate = NULL) {
@@ -85,11 +85,10 @@ class StatsD {
   /**
    * Decrements one or more stats counters.
    *
-   * @param $stats
+   * @param mixed $stats
    *   A string or an array of string representing the metric(s) to decrement.
-   * @param $sample_rate
+   * @param float $sample_rate
    *   A float between 0 and 1 representing the sampling rate.
-   * @return boolean
    *
    */
   public static function decrement($stats, $sample_rate = NULL) {
@@ -100,13 +99,12 @@ class StatsD {
   /**
    * Updates one or more stats counters by arbitrary amounts.
    *
-   * @param $stats
+   * @param mixed $stats
    *   A string or an array of string representing the metric(s) to increment or decrement.
-   * @param $delta
+   * @param int $delta
    *   The amount to increment/decrement each metric by.
-   * @param $sample_rate
+   * @param float $sample_rate
    *   A float between 0 and 1 representing the sampling rate.
-   * @return boolean
    *
    */
   public static function updateStats($stats, $delta = 1, $sample_rate = NULL) {
@@ -126,8 +124,13 @@ class StatsD {
   }
 
 
-  /*
-   * Squirt the metrics over UDP
+  /**
+   * Squirt the metrics over UDP.
+   *
+   * @param array $data
+   *   The data to send.
+   * @param float $sample_rate
+   *   A float between 0 and 1 representing the sample rate.
    *
    */
   public static function send($data, $sample_rate = NULL) {
@@ -170,10 +173,12 @@ class StatsD {
 
 
   /**
-   * Create the data strings that will be passed into statsd
+   * Create the data strings that will be passed into statsd.
    * 
    * @param $data
    *   An array of key value pairs to prefix.
+   *
+   * @return array
    * 
    */
   protected static function prefixData($data) {
