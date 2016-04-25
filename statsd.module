@@ -47,6 +47,7 @@ function statsd_user_login(&$edit, $account) {
 
 }
 
+
 /**
  * Send a failed login attempt.
  *
@@ -89,6 +90,7 @@ function statsd_exit($destination = NULL) {
 
 }
 
+
 /**
  * Implements hook_watchdog().
  *
@@ -117,6 +119,17 @@ function statsd_watchdog($entry) {
 }
 
 
+/**
+ * Implements hook_logger_event().
+ *
+ * @see https://drupal.org/project/logger
+ *
+ */
+function statsd_logger_event($name, $type, $value) {
+  statsd_call($name, $type, $value);
+}
+
+
 /* End of hooks, API functions follow.
 ---------------------------------------------------------------------- */
 
@@ -137,20 +150,24 @@ function statsd_call($name, $type = 'increment', $value = NULL) {
   require_once __DIR__ . '/includes/statsd.inc';
 
   switch ($type) {
+    case 'count':
+      StatsD::updateStats($name, $value);
+      break;
     case 'increment':
-        StatsD::updateStats($name, isset($value) ? $value : 1);
+      StatsD::updateStats($name, $value ?: 1);
       break;
     case 'decrement':
-        StatsD::updateStats($name, isset($value) ? $value : -1);
+      StatsD::updateStats($name, $value ?: -1);
       break;
     case 'gauge':
-        StatsD::gauge($name, $value);
+      StatsD::gauge($name, $value);
       break;
+    case 'time':
     case 'timing':
-        StatsD::timing($name, $value);
+    StatsD::timing($name, $value);
       break;
     default:
-        watchdog('statsd', 'Unknown method called for statsd: %type', array('%type' => $type), WATCHDOG_WARNING);
+      watchdog('statsd', 'Unknown method called for statsd: %type', array('%type' => $type), WATCHDOG_WARNING);
       break;
   }
 
