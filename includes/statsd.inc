@@ -156,7 +156,7 @@ class StatsD {
     $return = array();
 
     foreach ($data as $key => $value) {
-      $name = sprintf('%s' . $key . '%s', $prefix, $suffix);
+      $name = $prefix . $key . $suffix;
       $return[$name] = $value;
     }
 
