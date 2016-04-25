@@ -24,7 +24,7 @@ function statsd_admin_settings() {
     '#title'         => t('Port'),
     '#size'          => 5,
     '#description'   => t('The port of the StatsD daemon'),
-    '#default_value' => variable_get('statsd_port', '8125'),
+    '#default_value' => variable_get('statsd_port', 8125),
   );
   $form['events'] = array(
     '#type'        => 'fieldset',
@@ -41,7 +41,7 @@ function statsd_admin_settings() {
     '#type'          => 'checkbox',
     '#title'         => t('Send Performance Events'),
     '#description'   => t('Captures various performance events including peak memory usage and page execution time.'),
-    '#default_value' => variable_get('stats_performance_events', TRUE),
+    '#default_value' => variable_get('statsd_performance_events', TRUE),
   );
   $form['events']['statsd_watchdog_events'] = array(
     '#type'          => 'checkbox',

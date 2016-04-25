@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Implementation of hook_menu()
+ * Implements hook_menu().
  *
  */
 function statsd_menu() {
@@ -21,7 +21,7 @@ function statsd_menu() {
 
 
 /**
- * Implementation of hook_boot()
+ * Implements hook_boot().
  *
  */
 function statsd_boot() {
@@ -34,7 +34,7 @@ function statsd_boot() {
 
 
 /**
- * Implementation of hook_user_login()
+ * Implements hook_user_login().
  *
  */
 function statsd_user_login(&$edit, $account) {
@@ -48,7 +48,7 @@ function statsd_user_login(&$edit, $account) {
 }
 
 /**
- * Send failed login attempt
+ * Send a failed login attempt.
  *
  */
 function statsd_user_login_failed($account) {
@@ -63,7 +63,7 @@ function statsd_user_login_failed($account) {
 
 
 /**
- * Implementation of hook_exit()
+ * Implements hook_exit().
  *
  */
 function statsd_exit($destination = NULL) {
@@ -90,7 +90,7 @@ function statsd_exit($destination = NULL) {
 }
 
 /**
- * Implementation of hook_watchdog()
+ * Implements hook_watchdog().
  *
  */
 function statsd_watchdog($entry) {
@@ -108,8 +108,8 @@ function statsd_watchdog($entry) {
 
   $levels = watchdog_severity_levels();
   $data   = array(
-    sprintf('watchdog.type.%s', $entry['type']),
-    sprintf('watchdog.severity.%s', $levels[$entry['severity']]),
+    'watchdog.type.' . $entry['type'],
+    'watchdog.severity.' . $levels[$entry['severity']],
   );
 
   statsd_call($data);
