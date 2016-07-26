@@ -1,7 +1,0 @@
-name = StatsD
-description = Logs and records system events to Graphite via StatsD
-core = 7.x
-php = 5.3
-configure = admin/config/development/statsd
-
-files[] = includes/statsd.inc
