@@ -1,9 +1,11 @@
 <?php
 
+namespace Drupal\statsd;
 
 /**
  * Sends statistics to the stats daemon over UDP
  *
+ * @todo: Remove variable_get and pass in configuration.
  */
 
 class StatsD {
