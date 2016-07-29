@@ -1,27 +1,15 @@
 <?php
 
 /**
- * Implements hook_menu().
+ * @file Contains helper functions and hook implementations for StatsD.
  *
+ * @todo: Convert variable_get calls to config.
  */
-function statsd_menu() {
-
-  $items['admin/config/development/statsd'] = array(
-    'title'            => 'StatsD',
-    'description'      => 'Settings for statsd logging. StatsD is a Node JS daemon that aggregates statistics for visibility in Graphite. Best suited for compiling arbitrary statistics on various developer implemented metrics, this module can also be used to send all system events (via watchdog calls) to Graphite.',
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('statsd_admin_settings'),
-    'access arguments' => array('administer site configuration'),
-    'file'             => 'statsd.admin.inc',
-  );
-
-  return $items;
-
-}
-
 
 /**
  * Implements hook_boot().
+ *
+ * @todo: Reimplement.
  *
  */
 function statsd_boot() {
