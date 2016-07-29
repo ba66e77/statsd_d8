@@ -3,18 +3,17 @@
 /**
  * @file Contains helper functions and hook implementations for StatsD.
  *
- * @todo: Convert variable_get calls to config.
+ * @todo: Remove watchdog() calls and references.
  */
 
 /**
  * Implements hook_boot().
  *
- * @todo: Reimplement.
- *
+ * @todo: Replace with event subscriber: https://www.drupal.org/node/1909596
  */
 function statsd_boot() {
 
-  if (variable_get('statsd_performance_events', TRUE)) {
+  if (\Drupal::config('statsd.settings')->get('events.performance_events')) {
     drupal_static('statsd_timer', microtime(TRUE));
   }
 
@@ -24,10 +23,11 @@ function statsd_boot() {
 /**
  * Implements hook_user_login().
  *
+ * @inheritdoc
  */
 function statsd_user_login(&$edit, $account) {
 
-  if (!variable_get('statsd_user_events', TRUE)) {
+  if (! \Drupal::config('statsd.settings')->get('events.user_events')) {
     return;
   }
 
@@ -35,14 +35,17 @@ function statsd_user_login(&$edit, $account) {
 
 }
 
-
 /**
- * Send a failed login attempt.
+ * Send failed login attempt
  *
+ * @param string $account
+ *   The username of the user for whom login failed.
+ *
+ * @return Null
  */
 function statsd_user_login_failed($account) {
 
-  if (!variable_get('statsd_user_events', TRUE)) {
+  if (! \Drupal::config('statsd.settings')->get('events.user_events')) {
     return;
   }
 
@@ -54,16 +57,19 @@ function statsd_user_login_failed($account) {
 /**
  * Implements hook_exit().
  *
+ * @todo: Replace with kernal.terminate event subscriber:
+ *        https://www.drupal.org/node/1911186.
+ * @todo: Remove db_query call.
  */
 function statsd_exit($destination = NULL) {
 
-  if (variable_get('statsd_user_events', TRUE)) {
+  if (\Drupal::config('statsd.settings')->get('events.user_events')) {
     $active_sessions = db_query("SELECT count(*) as num FROM {sessions} WHERE timestamp > UNIX_TIMESTAMP() - 3600")->fetchField();
     statsd_call('user_events.active_sessions', 'gauge', $active_sessions);
     statsd_call('user_events.page_view');
   }
 
-  if (variable_get('statsd_performance_events', TRUE)) {
+  if (\Drupal::config('statsd.settings')->get('events.performance_events')) {
     $memory = round(memory_get_peak_usage() / 1024 / 1024, 2);
     statsd_call('performance_events.peak_memory', 'gauge', $memory);
 
@@ -78,10 +84,11 @@ function statsd_exit($destination = NULL) {
 
 }
 
-
 /**
- * Implements hook_watchdog().
+ * Implementation of hook_watchdog()
  *
+ * @todo: Re-implement. Hook_watchdog is gone:
+ *        https://www.drupal.org/node/2270941
  */
 function statsd_watchdog($entry) {
 
@@ -89,8 +96,8 @@ function statsd_watchdog($entry) {
     statsd_user_login_failed($entry['user']);
   }
 
-  $enabled = variable_get('statsd_watchdog_events', TRUE);
-  $level   = variable_get('statsd_watchdog_level', WATCHDOG_WARNING);
+  $enabled = \Drupal::config('statsd.settings')->get('events.watchdog_events');
+  $level   = \Drupal::config('statsd.settings')->get('events.watchdog_level');
 
   if (!$enabled || $level < $entry['severity']) {
     return;
