@@ -1,0 +1,6 @@
+services:
+  statsd.event_subscriber:
+    class: Drupal\statsd\EventSubscriber\StatsdEventSubscriber
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }

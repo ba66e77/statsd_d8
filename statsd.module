@@ -7,20 +7,6 @@
  */
 
 /**
- * Implements hook_boot().
- *
- * @todo: Replace with event subscriber: https://www.drupal.org/node/1909596
- */
-function statsd_boot() {
-
-  if (\Drupal::config('statsd.settings')->get('events.performance_events')) {
-    drupal_static('statsd_timer', microtime(TRUE));
-  }
-
-}
-
-
-/**
  * Implements hook_user_login().
  *
  * @inheritdoc
@@ -50,37 +36,6 @@ function statsd_user_login_failed($account) {
   }
 
   statsd_call('user_events.failed_login');
-
-}
-
-
-/**
- * Implements hook_exit().
- *
- * @todo: Replace with kernal.terminate event subscriber:
- *        https://www.drupal.org/node/1911186.
- * @todo: Remove db_query call.
- */
-function statsd_exit($destination = NULL) {
-
-  if (\Drupal::config('statsd.settings')->get('events.user_events')) {
-    $active_sessions = db_query("SELECT count(*) as num FROM {sessions} WHERE timestamp > UNIX_TIMESTAMP() - 3600")->fetchField();
-    statsd_call('user_events.active_sessions', 'gauge', $active_sessions);
-    statsd_call('user_events.page_view');
-  }
-
-  if (\Drupal::config('statsd.settings')->get('events.performance_events')) {
-    $memory = round(memory_get_peak_usage() / 1024 / 1024, 2);
-    statsd_call('performance_events.peak_memory', 'gauge', $memory);
-
-    $start = &drupal_static('statsd_timer');
-    // hook_boot() may not be called in certain contexts.
-    if ($start > 0) {
-      $end  = microtime(TRUE);
-      $time = round(($end - $start) * 1000, 0);
-      statsd_call('performance_events.execution_time', 'timing', $time);
-    }
-  }
 
 }
 
