@@ -10,6 +10,18 @@ namespace Drupal\statsd;
 
 class StatsD {
 
+  protected $config;
+
+ /**
+  * StatsD constructor.
+  *
+  * @param ConfigFactoryInterface $config
+  *   Accessor for getting the config.
+  */
+  public function __construct(ConfigFactoryInterface $config) {
+    $this->config = $config->get('statsd.settings');
+  }
+
   /**
    * Log timing information.
    *
@@ -137,7 +149,7 @@ class StatsD {
    */
   public static function send($data, $sample_rate = NULL) {
 
-    if (!variable_get('statsd_enabled', FALSE) ) {
+    if (! $this->config->get('enabled') ) {
       return;
     }
 

@@ -4,3 +4,6 @@ services:
     arguments: ['@config.factory']
     tags:
       - { name: event_subscriber }
+  statsd.object:
+    class: Drupal\statsd\StatsD
+    arguments: ['@config.factory']
