@@ -2,6 +2,8 @@
 
 namespace Drupal\statsd;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+
 /**
  * Sends statistics to the stats daemon over UDP
  *
@@ -147,7 +149,7 @@ class StatsD {
    *   A float between 0 and 1 representing the sample rate.
    *
    */
-  public static function send($data, $sample_rate = NULL) {
+  public function send($data, $sample_rate = NULL) {
 
     if (! $this->config->get('enabled') ) {
       return;
