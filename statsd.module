@@ -6,6 +6,8 @@
  * @todo: Remove watchdog() calls and references.
  */
 
+use Drupal\statsd\StatsD;
+
 /**
  * Implements hook_user_login().
  *
@@ -36,35 +38,6 @@ function statsd_user_login_failed($account) {
   }
 
   statsd_call('user_events.failed_login');
-
-}
-
-/**
- * Implementation of hook_watchdog()
- *
- * @todo: Re-implement. Hook_watchdog is gone:
- *        https://www.drupal.org/node/2270941
- */
-function statsd_watchdog($entry) {
-
-  if (strstr($entry['message'], 'Login attempt failed for')) {
-    statsd_user_login_failed($entry['user']);
-  }
-
-  $enabled = \Drupal::config('statsd.settings')->get('events.watchdog_events');
-  $level   = \Drupal::config('statsd.settings')->get('events.watchdog_level');
-
-  if (!$enabled || $level < $entry['severity']) {
-    return;
-  }
-
-  $levels = watchdog_severity_levels();
-  $data   = array(
-    'watchdog.type.' . $entry['type'],
-    'watchdog.severity.' . $levels[$entry['severity']],
-  );
-
-  statsd_call($data);
 
 }
 

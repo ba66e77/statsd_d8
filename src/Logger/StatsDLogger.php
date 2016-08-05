@@ -23,12 +23,12 @@ class StatsDLogger implements LoggerInterface {
    */
   public function log($level, $message, array $context = array()) {
 
-    if (strstr($entry['message'], 'Login attempt failed for')) {
+    if (strstr($message, 'Login attempt failed for')) {
       statsd_user_login_failed($entry['user']);
     }
 
-    $enabled = \Drupal::config('statsd.settings')->get('events.watchdog_events');
-    $level   = \Drupal::config('statsd.settings')->get('events.watchdog_level');
+    $enabled = $this->config->get('events.watchdog_events');
+    $level   = $this->config->get('events.watchdog_level');
 
     if (!$enabled || $level < $entry['severity']) {
       return;
