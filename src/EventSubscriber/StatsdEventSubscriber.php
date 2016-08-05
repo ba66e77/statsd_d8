@@ -5,6 +5,7 @@ namespace Drupal\statsd\EventSubscriber;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Database\Connection;
 
 /**
  * Subscribe to KernelEvents::REQUEST and ::TERMINATE events.
@@ -13,11 +14,14 @@ class StatsdEventSubscriber implements EventSubscriberInterface {
 
   protected $config;
 
+  protected $dbConnection;
+
   /**
    * Constructs a StatsdEventSubscriber object.
    */
-  public function __construct(ConfigFactoryInterface $config) {
+  public function __construct(ConfigFactoryInterface $config, Connection $dbConnection) {
     $this->config = $config->get('statsd.settings');
+    $this->dbConnection = $dbConnection;
   }
 
   /**
@@ -44,11 +48,10 @@ class StatsdEventSubscriber implements EventSubscriberInterface {
   /**
    * Set configured metrics on shut down.
    *
-   * @todo: Get rid of the db_query invocation.
    */
   public function statsdTerminateHandler() {
     if ($this->config->get('events.user_events')) {
-      $active_sessions = db_query("SELECT count(*) as num FROM {sessions} WHERE timestamp > UNIX_TIMESTAMP() - 3600")->fetchField();
+      $active_sessions = $this->dbConnection->query("SELECT count(*) as num FROM {sessions} WHERE timestamp > UNIX_TIMESTAMP() - 3600")->fetchField();
       statsd_call('user_events.active_sessions', 'gauge', $active_sessions);
       statsd_call('user_events.page_view');
     }
