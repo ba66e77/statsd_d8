@@ -3,6 +3,7 @@
 namespace Drupal\statsd\Logger;
 
 use Drupal\Core\Logger\RfcLoggerTrait;
+use Drupal\Core\Logger\RfcLogLevel;
 use Psr\Log\LoggerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 
@@ -23,21 +24,21 @@ class StatsDLogger implements LoggerInterface {
    */
   public function log($level, $message, array $context = array()) {
 
-    if (strstr($message, 'Login attempt failed for')) {
-      statsd_user_login_failed($entry['user']);
-    }
-
     $enabled = $this->config->get('events.watchdog_events');
-    $level   = $this->config->get('events.watchdog_level');
+    $eventThreshold   = $this->config->get('events.watchdog_level');
 
-    if (!$enabled || $level < $entry['severity']) {
+    if (!$enabled || $eventThreshold < $level) {
       return;
     }
 
-    $levels = watchdog_severity_levels();
+    if (strstr($message, 'Login attempt failed for')) {
+      statsd_user_login_failed($context['user']);
+    }
+
+    $levels = RfcLogLevel::getLevels();
     $data   = array(
-      'watchdog.type.' . $entry['type'],
-      'watchdog.severity.' . $levels[$entry['severity']],
+      'watchdog.type.' . $context['type'],
+      'watchdog.severity.' . $levels[$level],
     );
 
     statsd_call($data);
