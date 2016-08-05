@@ -12,18 +12,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 
 class StatsD {
 
-  protected $config;
-
- /**
-  * StatsD constructor.
-  *
-  * @param ConfigFactoryInterface $config
-  *   Accessor for getting the config.
-  */
-  public function __construct(ConfigFactoryInterface $config) {
-    $this->config = $config->get('statsd.settings');
-  }
-
   /**
    * Log timing information.
    *
@@ -151,7 +139,7 @@ class StatsD {
    */
   public function send($data, $sample_rate = NULL) {
 
-    if (! $this->config->get('enabled') ) {
+    if (!variable_get('statsd_enabled', FALSE) ) {
       return;
     }
 

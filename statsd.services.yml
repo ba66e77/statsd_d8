@@ -6,10 +6,6 @@ services:
     tags:
       - { name: event_subscriber }
 
-  statsd.object:
-    class: Drupal\statsd\StatsD
-    arguments: ['@config.factory']
-
   statsd.logger:
     class: Drupal\statsd\Logger\StatsDLogger
     arguments: ['@config.factory']

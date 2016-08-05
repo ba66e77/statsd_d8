@@ -15,9 +15,6 @@ class StatsdEventSubscriber implements EventSubscriberInterface {
 
   /**
    * Constructs a StatsdEventSubscriber object.
-   *
-   * @param ConfigFactoryInterface $config
-   *   Accessor for getting the config.
    */
   public function __construct(ConfigFactoryInterface $config) {
     $this->config = $config->get('statsd.settings');
