@@ -3,7 +3,6 @@
 /**
  * @file Contains helper functions and hook implementations for StatsD.
  *
- * @todo: Remove watchdog() calls and references.
  */
 
 use Drupal\statsd\StatsD;
@@ -68,9 +67,6 @@ function statsd_logger_event($name, $type, $value) {
  *
  */
 function statsd_call($name, $type = 'increment', $value = NULL) {
-  // In certain situations, hook_watchdog() is called early in the bootstrap
-  // process before autoloaded classes are available.
-  require_once __DIR__ . '/includes/statsd.inc';
 
   switch ($type) {
     case 'count':
@@ -90,10 +86,10 @@ function statsd_call($name, $type = 'increment', $value = NULL) {
       break;
     case 'time':
     case 'timing':
-    StatsD::timing($name, $value);
+      StatsD::timing($name, $value);
       break;
     default:
-      watchdog('statsd', 'Unknown method called for statsd: %type', array('%type' => $type), WATCHDOG_WARNING);
+      \Drupal::logger('statsd')->warning('Unknown method called for statsd: %type', array('%type' => $type));
       break;
   }
 
