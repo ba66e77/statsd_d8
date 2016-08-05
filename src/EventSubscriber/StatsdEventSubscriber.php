@@ -9,7 +9,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 /**
  * Subscribe to KernelEvents::REQUEST and ::TERMINATE events.
  */
-class StatsEventSubscriber implements EventSubscriberInterface {
+class StatsdEventSubscriber implements EventSubscriberInterface {
 
   protected $config;
 
