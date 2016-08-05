@@ -7,7 +7,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 /**
  * Sends statistics to the stats daemon over UDP
  *
- * @todo: Remove variable_get and pass in configuration.
  */
 
 class StatsD {
@@ -137,13 +136,13 @@ class StatsD {
    *   A float between 0 and 1 representing the sample rate.
    *
    */
-  public function send($data, $sample_rate = NULL) {
+  public static function send($data, $sample_rate = NULL) {
 
-    if (!variable_get('statsd_enabled', FALSE) ) {
+    if (! \Drupal::config('statsd.settings')->get('enabled') ) {
       return;
     }
 
-    $sample_rate  = $sample_rate ? $sample_rate : variable_get('statsd_sample_rate', 1);
+    $sample_rate  = $sample_rate ? $sample_rate : \Drupal::config('statsd.settings')->get('sample_rate');
     $sampled_data = array();
     $data         = self::prefixData($data);
 
@@ -161,8 +160,8 @@ class StatsD {
       return;
     }
 
-    $host = variable_get('statsd_host', '127.0.0.1');
-    $port = variable_get('statsd_port', 8125);
+    $host = \Drupal::config('statsd.settings')->get('host');
+    $port = \Drupal::config('statsd.settings')->get('port');
     $fp   = stream_socket_client("udp://$host:$port", $errno, $errstr);
 
     if ($fp) {
@@ -187,8 +186,8 @@ class StatsD {
    */
   protected static function prefixData($data) {
 
-    $prefix = ($prefix = variable_get('statsd_prefix', NULL) ) ? $prefix . '.' : '';
-    $suffix = ($suffix = variable_get('statsd_suffix', NULL) ) ? '.' . $suffix : '';
+    $prefix = ($prefix = \Drupal::config('statsd.settings')->get('prefix') ) ? $prefix . '.' : '';
+    $suffix = ($suffix = \Drupal::config('statsd.settings')->get('suffix') ) ? '.' . $suffix : '';
     $return = array();
 
     foreach ($data as $key => $value) {
