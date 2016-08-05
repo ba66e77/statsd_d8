@@ -113,7 +113,7 @@ class StatsdAdminSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
 
-    $config = $this->config('statsd.settings')
+    $this->config('statsd.settings')
       ->set('enabled', $form_state->getValue('enabled'))
       ->set('host', $form_state->getValue('host'))
       ->set('port', $form_state->getValue('port'))

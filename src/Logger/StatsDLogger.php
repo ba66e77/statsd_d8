@@ -16,7 +16,7 @@ class StatsDLogger implements LoggerInterface {
    * Construct a StatsDLogger interface to allow log event response.
    */
   public function __construct(ConfigFactoryInterface $config) {
-    $this->config = $config;
+    $this->config = $config->get('statsd.settings');
   }
 
   /**
@@ -24,24 +24,30 @@ class StatsDLogger implements LoggerInterface {
    */
   public function log($level, $message, array $context = array()) {
 
-    $enabled = $this->config->get('events.watchdog_events');
-    $eventThreshold   = $this->config->get('events.watchdog_level');
+    if ($context['channel'] != 'statsd') {
+      $enabled        = $this->config->get('events.watchdog_events');
+      $eventThreshold = $this->config->get('events.watchdog_level');
 
-    if (!$enabled || $eventThreshold < $level) {
-      return;
+      if (!$enabled || $eventThreshold < $level) {
+        return;
+      }
+
+      if (strstr($message, 'Login attempt failed')) {
+        // The user key in the context appears to be an instance of the
+        // AccountProxy class.
+        // @see https://api.drupal.org/api/drupal/core!lib!Drupal!Core!Session!AccountProxy.php/class/AccountProxy/8.2.x
+        statsd_user_login_failed($context['user']->getAccountName());
+      }
+
+      $levels = RfcLogLevel::getLevels();
+
+      $data = array(
+        'watchdog.type.' . $context['channel'],
+        'watchdog.severity.' . $levels[$level],
+      );
+
+      statsd_call($data);
     }
-
-    if (strstr($message, 'Login attempt failed for')) {
-      statsd_user_login_failed($context['user']);
-    }
-
-    $levels = RfcLogLevel::getLevels();
-    $data   = array(
-      'watchdog.type.' . $context['type'],
-      'watchdog.severity.' . $levels[$level],
-    );
-
-    statsd_call($data);
   }
 
 }

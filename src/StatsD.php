@@ -2,8 +2,6 @@
 
 namespace Drupal\statsd;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-
 /**
  * Sends statistics to the stats daemon over UDP
  *

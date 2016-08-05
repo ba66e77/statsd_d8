@@ -5,7 +5,7 @@ events:
   user_events: 1
   performance_events: 1
   watchdog_events: 1
-  watchdog_level: 4
-sample_rate: 1
+  watchdog_level: '4'
+sample_rate: '1'
 prefix: ''
 suffix: ''

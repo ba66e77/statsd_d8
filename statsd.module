@@ -14,7 +14,7 @@ use Drupal\statsd\StatsD;
  */
 function statsd_user_login(&$edit, $account) {
 
-  if (! \Drupal::config('statsd.settings')->get('events.user_events')) {
+  if (! \Drupal::config('statsd.settings')->get('events.user_events') ) {
     return;
   }
 
@@ -32,7 +32,7 @@ function statsd_user_login(&$edit, $account) {
  */
 function statsd_user_login_failed($account) {
 
-  if (! \Drupal::config('statsd.settings')->get('events.user_events')) {
+  if (! \Drupal::config('statsd.settings')->get('events.user_events') ) {
     return;
   }
 
